@@ -1,9 +1,11 @@
+import { ToDoList, ToDoListItem } from "./components/ToDoList.js"
 import { fetchSON } from "./functions/api.js"
 import { createElement } from "./functions/dom.js"
 
 try {
-    const todos = await fetchSON('https://jsonzplaceholder.typicode.com/todos?_limit=5')
-    
+    const todos = await fetchSON('https://jsonplaceholder.typicode.com/todos?_limit=5')
+    const list = new ToDoList(todos)
+    list.appendTo(document.querySelector('#todolist'))
 } catch (e) {
     const alertElement = createElement('div', {
         class: 'alert alert-danger m-4',
