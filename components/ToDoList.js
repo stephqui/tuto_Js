@@ -10,6 +10,9 @@ export class ToDoList {
     /** @type {Todo[]} */
     #todos = []
 
+    /** @type {HTMLUListElement} */
+    #listeElement = []
+
     /**
      * 
      * @param {Todo} todos 
@@ -36,11 +39,36 @@ export class ToDoList {
             <ul class="list-group">
             </ul>
         </main>`
-        const list = element.querySelector('.list-group')
+        this.#listeElement = element.querySelector('.list-group')
         for (let todo of this.#todos) {
             const t = new ToDoListItem(todo)
-            t.appendTo(list)
+            this.#listeElement.append(t.element)
         }
+        element.querySelector('form')
+            .addEventListener('submit', e => this.onSubmit(e))
+
+    }
+
+    /**
+     * 
+     * @param {SubmitEvent} e 
+     */
+    onSubmit(e) {
+        e.preventDefault()
+        const formTarget = e.currentTarget
+        const title = new FormData(formTarget).get('title').toString().trim()
+        if (title === '') {
+            return
+        }
+        const todo = {
+            id: Date.now(),
+            title,
+            completed: false
+        }
+
+        const item = new ToDoListItem(todo)
+        this.#listeElement.prepend(item.element)
+        formTarget.reset()
     }
 }
 
@@ -74,13 +102,24 @@ export class ToDoListItem {
         li.append(checkbox)
         li.append(label)
         li.append(button)
+
+        button.addEventListener('click', e => this.remove(e))
         this.#element = li
     }
 
     /**
-     * @param {HTMLElement} element 
+     * @return {HTMLElement} element 
      */
-    appendTo(element) {
-        element.append(this.#element)
+    get element() {
+        return this.#element
+    }
+
+    /**
+     * 
+     * @param {PointerEvent} e 
+     */
+    remove(e) {
+        e.preventDefault()
+        this.#element.remove()
     }
 }
