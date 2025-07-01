@@ -52,11 +52,12 @@ export class ToDoListItem {
         const li = createElement('li', {
             class: 'todo list-group-item d-flex align-items-center',
         })
+
         const checkbox = createElement('input', {
             type: 'checkbox',
             class: 'form-check-input',
             id,
-            
+            checked: todo.completed ? '' : null
         })
 
         const label = createElement('label', {
