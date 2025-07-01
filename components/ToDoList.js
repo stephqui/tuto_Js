@@ -44,8 +44,8 @@ export class ToDoList {
             const t = new ToDoListItem(todo)
             this.#listeElement.append(t.element)
         }
-        element.querySelector('form')
-            .addEventListener('submit', e => this.onSubmit(e))
+        element.querySelector('form').addEventListener('submit', e => this.onSubmit(e))
+        
 
     }
 
@@ -81,6 +81,8 @@ export class ToDoListItem {
             class: 'todo list-group-item d-flex align-items-center',
         })
 
+        this.#element = li
+
         const checkbox = createElement('input', {
             type: 'checkbox',
             class: 'form-check-input',
@@ -102,9 +104,11 @@ export class ToDoListItem {
         li.append(checkbox)
         li.append(label)
         li.append(button)
+        this.toggle(checkbox)
 
         button.addEventListener('click', e => this.remove(e))
-        this.#element = li
+        checkbox.addEventListener('change', e => this.toggle(e.currentTarget))
+
     }
 
     /**
@@ -121,5 +125,17 @@ export class ToDoListItem {
     remove(e) {
         e.preventDefault()
         this.#element.remove()
+    }
+
+    /**
+     * Change l'état "à faire/ fait" de la tache
+     * @param {HTMLInputElement} checkbox 
+     */
+    toggle(checkbox) {
+        if (checkbox.checked) {
+            this.#element.classList.add('is-completed')
+        } else {
+            this.#element.classList.remove('is-completed')
+        }
     }
 }
