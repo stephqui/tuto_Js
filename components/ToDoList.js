@@ -44,8 +44,10 @@ export class ToDoList {
             const t = new ToDoListItem(todo)
             this.#listeElement.append(t.element)
         }
-        element.querySelector('form').addEventListener('submit', e => this.onSubmit(e))
-        
+        element.querySelector('form').addEventListener('submit', e => this.#onSubmit(e))
+        element.querySelectorAll('.btn-group button').forEach(button => {
+            button.addEventListener('click', e => this.#toggleFilter(e))
+        })
 
     }
 
@@ -53,7 +55,7 @@ export class ToDoList {
      * 
      * @param {SubmitEvent} e 
      */
-    onSubmit(e) {
+    #onSubmit(e) {
         e.preventDefault()
         const formTarget = e.currentTarget
         const title = new FormData(formTarget).get('title').toString().trim()
@@ -69,6 +71,27 @@ export class ToDoList {
         const item = new ToDoListItem(todo)
         this.#listeElement.prepend(item.element)
         formTarget.reset()
+    }
+
+    /**
+     * 
+     * @param {PointerEvent} e 
+     */
+    #toggleFilter(e) {
+        e.preventDefault()
+        const filter = e.currentTarget.getAttribute('data-filter')
+        e.currentTarget.parentElement.querySelector('.active').classList.remove('active')
+        e.currentTarget.classList.add('active')
+        if (filter === 'todo') {
+            this.#listeElement.classList.add('hide-completed')
+            this.#listeElement.classList.remove('hide-todo')
+        } else if (filter === 'done') {
+            this.#listeElement.classList.add('hide-todo')
+            this.#listeElement.classList.remove('hide-completed')
+        } else {
+            this.#listeElement.classList.remove('hide-todo')
+            this.#listeElement.classList.remove('hide-completed')
+        }
     }
 }
 
