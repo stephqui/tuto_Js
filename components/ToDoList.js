@@ -26,7 +26,7 @@ export class ToDoList {
      * @param {HTMLElement} element 
      */
     appendTo(element) {
-        element.append(cloneTemplate('todolist-layout') )
+        element.append(cloneTemplate('todolist-layout'))
         this.#listeElement = element.querySelector('.list-group')
         for (let todo of this.#todos) {
             const t = new ToDoListItem(todo)
@@ -37,6 +37,15 @@ export class ToDoList {
             button.addEventListener('click', e => this.#toggleFilter(e))
         })
 
+        this.#listeElement.addEventListener('delete', ({ detail: todo }) => {
+            this.#todos = this.#todos.filter(t => t !== todo)
+            this.#onUpdate()
+        })
+
+        this.#listeElement.addEventListener('toggle', ({ detail: todo }) => {
+            todo.completed = !todo.completed
+            this.#onUpdate()
+        })
     }
 
     /**
@@ -58,7 +67,13 @@ export class ToDoList {
 
         const item = new ToDoListItem(todo)
         this.#listeElement.prepend(item.element)
+        this.#todos.push(todo)
+        this.#onUpdate()
         formTarget.reset()
+    }
+
+    #onUpdate() {//Pour regrouper les accès et les écritures dans le localStorage
+        localStorage.setItem('lesTodos', JSON.stringify(this.#todos))
     }
 
     /**
@@ -84,16 +99,20 @@ export class ToDoList {
 }
 
 export class ToDoListItem {
+
     #element
+    #todo
+
     /** @type {Todo} */
     constructor(todo) {
+        this.#todo = todo
         const id = `todo-${todo.id}`
         const li = cloneTemplate('todolist-item').firstElementChild
         this.#element = li
 
         const checkbox = li.querySelector('input')
         checkbox.setAttribute('id', id)
-        if(todo.completed){
+        if (todo.completed) {
             checkbox.setAttribute('checked', '')
         }
         const label = li.querySelector('label')
@@ -105,6 +124,12 @@ export class ToDoListItem {
 
         button.addEventListener('click', e => this.remove(e))
         checkbox.addEventListener('change', e => this.toggle(e.currentTarget))
+
+        this.#element.addEventListener('delete', e => {
+        })
+        /*document.body.addEventListener('delete', e=>{
+            console.log('body', e)
+        })*/
 
     }
 
@@ -121,6 +146,15 @@ export class ToDoListItem {
      */
     remove(e) {
         e.preventDefault()
+        const eventTest = new CustomEvent('delete', {
+            detail: this.#todo,
+            bubbles: true,
+            cancelable: true
+        })
+        this.element.dispatchEvent(eventTest)
+        if (eventTest.defaultPrevented) {
+            return
+        }
         this.#element.remove()
     }
 
@@ -134,5 +168,10 @@ export class ToDoListItem {
         } else {
             this.#element.classList.remove('is-completed')
         }
+        const eventTest = new CustomEvent('toggle', {
+            detail: this.#todo,
+            bubbles: true
+        })
+        this.#element.dispatchEvent(eventTest)
     }
 }
